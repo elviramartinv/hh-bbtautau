@@ -11,7 +11,7 @@ VBFHH_NonRes = st.VBFHH_NonRes -7
 ggHH_Res = st.ggHH_Res -7
 VBFHH_Res = st.VBFHH_Res -7
 
-@numba.njit
+#@numba.jit(nopython=False)
 def calculeteNEvents(X, Z):
     mass_node = np.where(Z[:, 0, 3] == -1, Z[:, 0, 2], Z[:, 0, 3])
     mass_node_unique = np.unique(mass_node)

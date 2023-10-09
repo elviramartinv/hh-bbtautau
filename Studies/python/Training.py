@@ -3,6 +3,7 @@
 
 import tensorflow as tf
 gpus = tf.config.experimental.list_physical_devices('GPU')
+#print(gpus)
 tf.config.experimental.set_memory_growth(gpus[0], True)
 
 from tensorflow import keras
@@ -12,7 +13,7 @@ import argparse
 import json
 import numpy as np
 
-import InputsProducer
+import InputsProducer_new as InputsProducer
 import ParametrizedModel as pm
 from CalculateWeigths import CreateSampleWeigts, CrossCheckWeights
 import ROOT
@@ -44,13 +45,14 @@ class WeightsSaver(Callback):
 
   def on_epoch_end(self, epoch, logs={}):
     if self.epoch % self.N == 0:
-        name = '{}_par{}_weight_epoch_{}.h5'.format(args.output, args.parity, self.epoch )
+        name = '{}_par{}_weight_epoch_{}.tf'.format(args.output, args.parity, self.epoch )
+        #name = '{}_par{}_weight_epoch_{}.h5'.format(args.output, args.parity, self.epoch )
         self.model.save_weights(name)
     self.epoch += 1
 
 def PerformTraining(file_name, n_epoch, params):
     np.random.seed(args.seed)
-    data = InputsProducer.CreateRootDF(file_name, 0, True, True)
+    data = InputsProducer.CreateRootDF(file_name, 0, True, False)
     X, Y, Z, var_pos, var_pos_z, var_name = InputsProducer.CreateXY(data, args.training_variables)
     print(var_pos)
     w = CreateSampleWeigts(X, Z)
@@ -69,13 +71,15 @@ def PerformTraining(file_name, n_epoch, params):
 
     early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_sel_acc_2', mode='max', patience=args.patience)
     csv_logger = CSVLogger('{}_par{}_training_history.csv'.format(args.output, args.parity), append=False, separator=',')
-    save_best_only =  tf.keras.callbacks.ModelCheckpoint(filepath='{}_par{}_best_weights.h5'.format(args.output, args.parity),
+    save_best_only =  tf.keras.callbacks.ModelCheckpoint(filepath='{}_par{}_best_weights.tf'.format(args.output, args.parity),
+    #save_best_only =  tf.keras.callbacks.ModelCheckpoint(filepath='{}_par{}_best_weights.h5'.format(args.output, args.parity),
                                                          monitor='val_sel_acc_2',  mode='max', save_best_only=True, verbose=1)
 
     model.fit(X, Y, sample_weight=w, validation_split=args.validation_split, epochs=args.n_epoch, batch_size=params['batch_size'],
               callbacks=[csv_logger, save_best_only, early_stop, WeightsSaver(1)],verbose=2)
 
-    model.save_weights('{}_par{}_final_weights.h5'.format(args.output, args.parity))
+    model.save_weights('{}_par{}_final_weights.tf'.format(args.output, args.parity))
+    #model.save_weights('{}_par{}_final_weights.h5'.format(args.output, args.parity))
 
 with open('{}_par{}_params.json'.format(args.output, args.parity), 'w') as f:
     f.write(json.dumps(params, indent=4))

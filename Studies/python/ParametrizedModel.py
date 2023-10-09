@@ -131,7 +131,7 @@ class HHModel(Model):
         last_pre = x
 
         for i in range(len(self.rnn)):
-            x = self.rnn[i](x, mask=mask)
+            #x = self.rnn[i](x, mask=mask)
             if len(self.batch_norm_rnn) > i:
                 x = self.batch_norm_rnn[i](x)
             if len(self.dropout_rnn) > i:

@@ -27,7 +27,7 @@ def FindFiles(path, pattern) :
             if re.match(pattern, file):
                 files.append(os.path.join(r, file))
                 print(os.path.join(r, file))
-
+    print(path)
     v = ROOT.std.vector('string')()
     for file in files:
         v.push_back(file)
@@ -90,14 +90,14 @@ def CreateColums() :
     ]
 
     all_vars = evt_columns + jet_column
-    jet_columns = []
+    jet_columns = [] 
 
     for jet_var in jet_column :
         for n in range(10) :
             jet_columns.append(jet_var.format(n))
 
     return evt_columns, jet_column, all_vars, jet_columns
-
+    
 
 def GetIndex(x) :
     evt_columns, jet_column, all_vars, jet_columns = CreateColums()
